@@ -1093,6 +1093,16 @@ body {
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) Sound.sleep(); else Sound.wake();
     });
+    /* Music on by default: start on the very first touch/click/key (browsers block sound before that) */
+    let autoStarted = false;
+    const autoStart = e => {
+      if (autoStarted) return;
+      autoStarted = true;
+      ['pointerdown','touchstart','keydown'].forEach(t => document.removeEventListener(t, autoStart, true));
+      if (e && e.target instanceof Element && e.target.closest('.sound')) return;
+      if (soundBtn.getAttribute('aria-pressed') !== 'true') soundBtn.setAttribute('aria-pressed', String(Sound.toggle()));
+    };
+    ['pointerdown','touchstart','keydown'].forEach(t => document.addEventListener(t, autoStart, { capture: true, passive: true }));
   } else {
     soundBtn.remove();
   }
